@@ -1,15 +1,21 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { fetchProducts } from "./productsAPI";
+import { fetchProducts, postProduct } from "./productsAPI";
 
 const initialState = {
     products: [],
     isLoading: false,
+    postSuccess: false,
     isError: false,
     error: " "
 };
 
 export const getProducts = createAsyncThunk("products/getProduct", async () => {
     const products = fetchProducts()
+    return products
+})
+
+export const addProducts = createAsyncThunk("products/addProduct", async (data) => {
+    const products = postProduct(data)
     return products
 })
 
@@ -30,6 +36,24 @@ const productSlice = createSlice({
             .addCase(getProducts.rejected, (state, action) => {
                 state.products = [];
                 state.isLoading = false;
+                state.isError = true;
+                state.error = action.error.message;
+            })
+
+
+            .addCase(addProducts.pending, (state, action) => {
+                state.isLoading = true;
+                state.postSuccess = false;
+                state.isError = false;
+            })
+            .addCase(addProducts.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.postSuccess = true;
+            })
+            .addCase(addProducts.rejected, (state, action) => {
+                state.products = [];
+                state.isLoading = false;
+                state.postSuccess = false;
                 state.isError = true;
                 state.error = action.error.message;
             })
